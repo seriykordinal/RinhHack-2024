@@ -1,0 +1,155 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class Main {
+    public static void main(String[] args)
+    {
+        String[] users = new String[]{"ivanov", "petrov", "smirnov"};   //примерный массив пользователей
+        String[] apps = new String[]{"LibreOffice", "Chromium", "Thunderbird", "OpenScap", "redos-education"};  //примерный массив приложений
+        RedFrame myFrame = new RedFrame("Киоск для Red OS", users, apps);   //создание окна
+
+        myFrame.setPnl1();
+
+        myFrame.setVisible(true);
+    }
+}
+
+public class RedFrame extends JFrame
+{
+    private JPanel pnl1;
+    private String[] users;     //массив всех пользователей
+    private String[] apps;      //массив всех доступных приложений
+    private String[] dataMain;  //массив со всеми данными об ограничениях, кроме доступных приложений
+    private String[] dataApp;   //маасив с данными об ограничениях приложений
+    RedFrame(String name, String[] users, String[] apps)
+    {
+        super(name);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setResizable(false);
+        setLayout(null);
+        setBounds(400, 150, 900, 500);
+
+        dataMain = new String[5];
+        dataApp = new String[apps.length];
+
+        pnl1 = new JPanel(null);
+        pnl1.setBackground(Color.WHITE);
+
+        this.users = users;
+        this.apps = apps;
+    }
+
+    void setPnl1()      //метод для создания всего графического интерфейса
+    {
+
+        pnl1.setBounds(0, 0, getWidth(), getHeight());
+
+        JLabel lblUsers = new JLabel("Пользователь: ");
+        lblUsers.setBounds(75, 35, 100, 30);
+        pnl1.add(lblUsers);
+
+        JComboBox boxUsers = new JComboBox<>(users);
+        boxUsers.setBounds(200, 35, 150, 30);
+        pnl1.add(boxUsers);
+
+        JLabel lblApps = new JLabel("Приложения: ");
+        lblApps.setBounds(75, 110, 100, 30);
+        pnl1.add(lblApps);
+
+        JCheckBox[] checkArr = new JCheckBox[apps.length];
+        int y = 40, height = 40, adder = 30;
+
+        for (int i = 0;i < apps.length;i++)
+        {
+            height += adder;
+
+            checkArr[i] = new JCheckBox(apps[i], false);
+            checkArr[i].setBounds(200, y + height , 150, 30);
+            pnl1.add(checkArr[i]);
+
+        }
+
+
+        JLabel lblTime = new JLabel("Время перед включением хранителя экрана: ", JLabel.RIGHT);
+        lblTime.setBounds(465, 35, 300, 30);
+        pnl1.add(lblTime);
+
+        SpinnerNumberModel modelTime = new SpinnerNumberModel(0, 0, 1440, 1);
+
+        JSpinner spinnerTime = new JSpinner(modelTime);
+        spinnerTime.setBounds(lblTime.getX() + lblTime.getWidth() + 10, 35, 85, 30);
+        pnl1.add(spinnerTime);
+
+        JCheckBox checkBlockBtn = new JCheckBox("Отображение кнопки блокирования экрана", false);
+        checkBlockBtn.setBounds(40 + 450, spinnerTime.getY() + spinnerTime.getHeight() + 45, 370, spinnerTime.getHeight());
+        pnl1.add(checkBlockBtn);
+
+        JCheckBox checkAutoHide = new JCheckBox("Автоматическое скрытие главной панели Рабочего стола", true);
+        checkAutoHide.setBounds(checkBlockBtn.getX(), checkBlockBtn.getY() + checkBlockBtn.getHeight() + 45,
+                checkBlockBtn.getWidth(), spinnerTime.getHeight());
+        pnl1.add(checkAutoHide);
+
+        JCheckBox checkQuiet = new JCheckBox("Подавление вывода на экран", false);
+        checkQuiet.setBounds(checkBlockBtn.getX(), checkAutoHide.getY() + checkAutoHide.getHeight() + 45,
+                checkBlockBtn.getWidth(), spinnerTime.getHeight());
+        pnl1.add(checkQuiet);
+
+        JButton btnOn = new JButton("Включить режим каталога");
+        btnOn.setBounds(125 + 450, 330,200, 40);
+        btnOn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                JOptionPane.showMessageDialog(null, "Режим каталога включен для пользователя " +
+                        boxUsers.getSelectedItem().toString());
+
+                dataMain[0] = boxUsers.getSelectedItem().toString();    //запись в общий массив всех нужных данных
+                dataMain[1] = spinnerTime.getValue().toString();
+                dataMain[2] = Boolean.toString(checkBlockBtn.isSelected());
+                dataMain[3] = Boolean.toString(checkAutoHide.isSelected());
+                dataMain[4] = Boolean.toString(checkQuiet.isSelected());
+
+                for (int i = 0;i < apps.length;i++)
+                {
+                    if (checkArr[i].isSelected())   //запись в массив информацию о достыпных приложениях
+                    {
+                        dataApp[i] = apps[i];
+                    }
+                    else
+                    {
+                        dataApp[i] = "0";
+                    }
+                }
+
+                JOptionPane.showMessageDialog(null, dataMain[0] + " " + dataMain[1] + " " +
+                        dataMain[2] + " " + dataMain[3] + " " + dataMain[4],"Основные данные",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                JOptionPane.showMessageDialog(null, dataApp[0] + " " + dataApp[1] + " " +
+                                dataApp[2] + " " + dataApp[3] + " " + dataApp[4],
+                        "Данные о доступных приложениях", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        pnl1.add(btnOn);
+
+
+        JButton btnOff = new JButton("Выключить режим каталога");
+        btnOff.setBounds(125 + 450, 400,200, 40);
+        btnOff.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "Режим каталога выключен для пользователя " +
+                        boxUsers.getSelectedItem().toString());
+            }
+        });
+        pnl1.add(btnOff);
+
+
+        add(pnl1);
+    }
+
+
+
+}
